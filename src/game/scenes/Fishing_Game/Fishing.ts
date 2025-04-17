@@ -7,15 +7,17 @@ const Min_Depth: number = 250;
 const Max_Width: number = 900;
 const Min_Width: number = -100;
 let randomAmount_category: number = 5;
-let amount_fish: number = 30;
+let amount_fish: number = 7;
 let amount_shark: number = 2;
-let category: string[] = [
-    "orange",
-    "blue",
-    "green",
-    "purple",
-    "yellow",
-];
+let category: string[] = ["orange", "blue", "green", "purple", "yellow"];
+let categoryObject: { [key: string]: number } = {
+    orange: 0,
+    blue: 0,
+    green: 0,
+    purple: 0,
+    yellow: 0,
+    shark: 0,
+};
 
 export class Fishing extends Phaser.Scene {
     private spriteData: any;
@@ -37,6 +39,10 @@ export class Fishing extends Phaser.Scene {
     private levelStartText!: Phaser.GameObjects.Text;
     private levelInstructionBoard!: Phaser.GameObjects.Image;
     private levelStartButton!: Phaser.GameObjects.Image;
+    private lastHookX: number = 0;
+    private lastHookY: number = 0;
+    private hookIsMoving: boolean = false;
+    private fishCount: number = 0;
 
     constructor() {
         super({ key: "Fishing" });
@@ -46,15 +52,24 @@ export class Fishing extends Phaser.Scene {
         this.spriteData = data.spriteData;
     }
 
-    private loadFontAndAddText(fontFamily: string, fontSize: string, text: string, x: number, y: number, color: string): Promise<Phaser.GameObjects.Text> {
+    private loadFontAndAddText(
+        fontFamily: string,
+        fontSize: string,
+        text: string,
+        x: number,
+        y: number,
+        color: string
+    ): Promise<Phaser.GameObjects.Text> {
         return new Promise((resolve) => {
             document.fonts.load(`1em '${fontFamily}'`).then(() => {
-                const textObject = this.add.text(x, y, text, {
-                    fontSize: fontSize,
-                    fontFamily: fontFamily,
-                    color: color,
-                    align: "center",
-                }).setOrigin(0.5, 0.5);
+                const textObject = this.add
+                    .text(x, y, text, {
+                        fontSize: fontSize,
+                        fontFamily: fontFamily,
+                        color: color,
+                        align: "center",
+                    })
+                    .setOrigin(0.5, 0.5);
                 resolve(textObject);
             });
         });
@@ -210,8 +225,14 @@ export class Fishing extends Phaser.Scene {
             "background-fishing",
             "assets/fishing_assets/background.jpg"
         );
-        this.load.image("background_instructions", "assets/fishing_assets/ui/background_instructions.png");
-        this.load.image("button_start", "assets/fishing_assets/ui/button_start.png");
+        this.load.image(
+            "background_instructions",
+            "assets/fishing_assets/ui/background_instructions.png"
+        );
+        this.load.image(
+            "button_start",
+            "assets/fishing_assets/ui/button_start.png"
+        );
         this.load.image("foreground", "assets/fishing_assets/foreground.png");
         this.load.image("hook", "assets/fishing_assets/hook.png");
         this.load.audio("success", "assets/fishing_assets/success.mp3");
@@ -255,9 +276,13 @@ export class Fishing extends Phaser.Scene {
         this.fishGroup = this.add.group();
         this.success = this.sound.add("success");
         this.failure = this.sound.add("failure");
-        this.containerBoard = this.add.container(390,375);
-        this.levelInstructionBoard = this.add.image(0,-35,"background_instructions").setOrigin(0.5, 0.5);
-        this.levelStartButton = this.add.image(0,130,"button_start").setOrigin(0.5,0.5);
+        this.containerBoard = this.add.container(390, 375);
+        this.levelInstructionBoard = this.add
+            .image(0, -35, "background_instructions")
+            .setOrigin(0.5, 0.5);
+        this.levelStartButton = this.add
+            .image(0, 130, "button_start")
+            .setOrigin(0.5, 0.5);
         // // Gán giá trị cho các biến
         // this.loadFontAndAddText("Mukta ExtraBold", "45px", "Start", 390, 460, "#7d1108").then(text => this.levelStartText = text);
         // this.loadFontAndAddText("Mukta Bold", "25px", "Level 1", 390, 550, "#7d1108").then(text => this.levelText = text);
@@ -273,38 +298,74 @@ export class Fishing extends Phaser.Scene {
         //     this.levelStartText
         // ]);
         Promise.all([
-            this.loadFontAndAddText("Mukta ExtraBold", "45px", "Start", 0, 90, "#7d1108"),
-            this.loadFontAndAddText("Mukta Regular", "25px", "Watch out for sharks.", 0, -10, "#0e8a7d"),
-            this.loadFontAndAddText("Mukta ExtraBold", "38px", "Tap to try and catch the fish.", 0, -50, "#0e8a7d"),
-            this.loadFontAndAddText("Mukta Bold", "25px", "Level 1", 0, 180, "#7d1108")
-        ]).then(([levelStartText, levelStateText, levelInstructionText, levelText]) => {
-            this.levelStateText = levelStateText;
-            this.levelInstructionText = levelInstructionText;
-            this.levelStartText = levelStartText;
-            this.levelText = levelText;
-        
-            this.containerBoard.add([
-                this.levelInstructionBoard,
-                this.levelInstructionText,
-                this.levelStartButton,
-                this.levelStateText,
-                this.levelText,
-                this.levelStartText
-            ]);
-            this.levelStartButton.setInteractive()
-            .on("pointerover", () => {
-                this.input.setDefaultCursor("pointer"); 
-            })
-            .on("pointerout", () => {
-                this.input.setDefaultCursor("default"); 
-            })
-            .on("pointerdown", () => {
-                this.scene.restart();
-            });
-        });
+            this.loadFontAndAddText(
+                "Mukta ExtraBold",
+                "45px",
+                "Start",
+                0,
+                90,
+                "#7d1108"
+            ),
+            this.loadFontAndAddText(
+                "Mukta Regular",
+                "25px",
+                "Watch out for sharks.",
+                0,
+                -10,
+                "#0e8a7d"
+            ),
+            this.loadFontAndAddText(
+                "Mukta ExtraBold",
+                "38px",
+                "Tap to try and catch the fish.",
+                0,
+                -50,
+                "#0e8a7d"
+            ),
+            this.loadFontAndAddText(
+                "Mukta Bold",
+                "25px",
+                "Level 1",
+                0,
+                180,
+                "#7d1108"
+            ),
+        ]).then(
+            ([
+                levelStartText,
+                levelStateText,
+                levelInstructionText,
+                levelText,
+            ]) => {
+                this.levelStateText = levelStateText;
+                this.levelInstructionText = levelInstructionText;
+                this.levelStartText = levelStartText;
+                this.levelText = levelText;
+
+                this.containerBoard.add([
+                    this.levelInstructionBoard,
+                    this.levelInstructionText,
+                    this.levelStartButton,
+                    this.levelStateText,
+                    this.levelText,
+                    this.levelStartText,
+                ]);
+                this.levelStartButton
+                    .setInteractive()
+                    .on("pointerover", () => {
+                        this.input.setDefaultCursor("pointer");
+                    })
+                    .on("pointerout", () => {
+                        this.input.setDefaultCursor("default");
+                    })
+                    .on("pointerdown", () => {
+                        this.scene.restart();
+                    });
+            }
+        );
         this.containerBoard.setDepth(1);
         this.containerBoard.setVisible(false);
-        
+
         // Tạo animation bird
         this.createAnimationPlay("bird", "bird_anim");
         // Tạo animation bird_post
@@ -347,14 +408,29 @@ export class Fishing extends Phaser.Scene {
         });
     }
     update(): void {
-        // Duyệt qua tất cả cá trong game
+        this.hookIsMoving =
+            this.hook.x !== this.lastHookX || this.hook.y !== this.lastHookY;
+
+        if (this.hookIsMoving) {
+            this.checkFishCaught();
+        }
+
+        // Cập nhật vị trí hook để kiểm tra lần sau
+        this.lastHookX = this.hook.x;
+        this.lastHookY = this.hook.y;
+    }
+
+    private checkFishCaught(): void {
         (this.fishGroup.getChildren() as Phaser.GameObjects.Sprite[]).forEach(
             (fish) => {
                 if (
+                    !fish.getData("isCaught") && // Kiểm tra nếu chưa bị bắt
                     Math.abs(fish.x - this.hook.x) < 15 &&
                     Math.abs(fish.y - this.hook.y) < 15
                 ) {
-                    this.catchFish(fish);
+                    fish.setData("isCaught", true); // Đánh dấu cá đã bị bắt
+                    const fishType: string = fish.texture.key.split("_")[0];
+                    this.catchFish(fish, fishType);
                 }
             }
         );
@@ -405,12 +481,27 @@ export class Fishing extends Phaser.Scene {
             }
         }
     }
+
+    private drawRope(): void {
+        this.rope.clear();
+        this.rope.lineStyle(1, 0xffffff, 1);
+        this.rope.beginPath();
+        this.rope.moveTo(this.fisherman.x + 111, this.fisherman.y - 144);
+        this.rope.lineTo(this.hook.x + 5, this.hook.y - 45);
+        this.rope.strokePath();
+    }
+
+    private Score(category: string) {
+        categoryObject[category] += 1;
+    }
+
     private spawnFishSwim(category: string, depth: number, flip: number) {
         if (category === "shark") {
             this.shark = this.add
                 .sprite(Min_Width, depth, "shark_caught_0")
                 .setOrigin(0.5, 1);
             this.shark.play("shark_swim_anim");
+
             this.tweens.add({
                 targets: this.shark,
                 x: Max_Width,
@@ -418,12 +509,13 @@ export class Fishing extends Phaser.Scene {
                 ease: "Linear",
                 repeat: -1,
             });
+
             this.fishGroup.add(this.shark);
         } else {
             this.createTweenSwim(category, flip, depth);
-            this.fishGroup.add(this.fish);
         }
     }
+
     private createTweenSwim(category: string, flip: number, depth: number) {
         if (flip === 1) {
             this.fish = this.add
@@ -437,28 +529,61 @@ export class Fishing extends Phaser.Scene {
                 .setOrigin(0.5, 1);
             destination = Min_Width;
         }
+
+        let fishNumber = this.add
+            .text(
+                this.fish.x,
+                this.fish.y - 30,
+                this.fishGroup.getLength().toString(),
+                {
+                    fontSize: "20px",
+                    fontStyle: "bold",
+                    color: "#fff",
+                }
+            )
+            .setOrigin(0.5);
+
+        this.fish.setData("fishNumber", fishNumber);
+
         this.fish.play(`${category}_fish_swim_anim`);
         this.tweens.add({
-            targets: this.fish,
+            targets: [this.fish, fishNumber],
             x: destination,
             duration: Phaser.Math.Between(3000, 7000),
             ease: "Linear",
             repeat: -1,
         });
+
+        this.fishGroup.add(this.fish);
     }
 
-    private drawRope(): void {
-        this.rope.clear();
-        this.rope.lineStyle(1, 0xffffff, 1);
-        this.rope.beginPath();
-        this.rope.moveTo(this.fisherman.x + 111, this.fisherman.y - 144);
-        this.rope.lineTo(this.hook.x + 5, this.hook.y - 45);
-        this.rope.strokePath();
+    private randomFish(amount: number): void {
+        const delayBetweenSpawns = 500; // Thời gian giữa mỗi lần spawn (ms)
+
+        for (let i: number = 0; i < amount; i++) {
+            const randomIndex: number = Math.floor(
+                Math.random() * randomAmount_category
+            );
+            const flip: number = Math.floor(Math.random() * 1);
+            const depth: number = Math.floor(
+                Math.random() * Min_Depth + Max_Depth - Min_Depth
+            );
+
+            this.time.delayedCall(i * delayBetweenSpawns, () => {
+                this.spawnFishSwim(category[randomIndex], depth, flip);
+            });
+        }
+        for (let i: number = 0; i < amount_shark; i++) {
+            const depth: number = Math.floor(
+                Math.random() * Min_Depth + Max_Depth - Min_Depth
+            );
+            const flip: number = Math.floor(Math.random() * 1);
+            this.spawnFishSwim("shark", depth, flip);
+        }
     }
     // Hàm xử lý khi cá bị bắt
-    private catchFish(fish: Phaser.GameObjects.Sprite): void {
+    private catchFish(fish: Phaser.GameObjects.Sprite, fishType: string): void {
         // Lấy loại cá từ key của frame đầu tiên
-        const fishType: string = fish.texture.key.split("_")[0];
         if (fishType === "shark") {
             fish.play("shark_caught_anim");
             this.rope.setVisible(false);
@@ -476,27 +601,12 @@ export class Fishing extends Phaser.Scene {
             this.time.delayedCall(500, () => fish.setAlpha(0.5));
 
             // Sau khi chạy xong animation thì xóa cá
-            this.time.delayedCall(500, () => fish.destroy());
-        }
-    }
-    private randomFish(amount: number): void {
-        const delayBetweenSpawns = 500; // Thời gian giữa mỗi lần spawn (ms)
-
-        for (let i: number = 0; i < amount; i++) {
-            const randomIndex: number = Math.floor(Math.random() * randomAmount_category);
-            const flip: number = Math.floor(Math.random() * 1);
-            const depth: number = Math.floor((Math.random() * Min_Depth) + Max_Depth - Min_Depth);
-
-            this.time.delayedCall(i * delayBetweenSpawns, () => {
-                this.spawnFishSwim(category[randomIndex], depth, flip);
+            this.time.delayedCall(500, () => {
+                let fishNumber = fish.getData("fishNumber");
+                fishNumber.destroy();
+                this.Score(fishType);
+                fish.destroy();
             });
-        }
-        for (let i: number = 0; i < amount_shark; i++){
-            const depth: number = Math.floor(
-                (Math.random() * Min_Depth) + Max_Depth - Min_Depth
-            );
-            const flip: number = Math.floor(Math.random() * 1);
-            this.spawnFishSwim('shark', depth, flip);
         }
     }
 }

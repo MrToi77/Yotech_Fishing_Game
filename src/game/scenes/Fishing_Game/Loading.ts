@@ -1,3 +1,4 @@
+import generateModelInstance from "@/game/Model/generateModel";
 export class PreloadFishing extends Phaser.Scene {
     constructor() {
         super("PreloadFishing");
@@ -36,9 +37,12 @@ export class PreloadFishing extends Phaser.Scene {
     }
 
     startGame() {
-        const spriteData = this.cache.json.get("spriteData");
-        console.log("✅ JSON Loaded:", spriteData);
+        generateModelInstance.spriteData = this.cache.json.get("spriteData");
+        const spriteData = generateModelInstance.spriteData;
+        console.log("✅ JSON Loaded:", generateModelInstance.spriteData);
 
-        this.scene.start("Fishing", { spriteData });
+        this.scene.start("mainScene", { spriteData });
+
+        this.scene.launch("secondScene", { spriteData });
     }
 }

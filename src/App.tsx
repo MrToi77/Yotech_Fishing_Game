@@ -35,15 +35,8 @@ function App()
         <div id="app">
             <PhaserGame ref={phaserRef} currentActiveScene={currentScene} />
             <div>
-                <div>
-                    <input className='outside-in-message' type='text' placeholder='Message' onChange={onMessageChange}/>
-                </div>
-
-                <div>
-                    <button className="button" onClick={outsideIn}>Outside In</button>
-                </div>
-                <div className="inside-out-message">Inside out: {insideOutMessage}
-                </div>
+              
+              
             </div>
         </div>
     )
