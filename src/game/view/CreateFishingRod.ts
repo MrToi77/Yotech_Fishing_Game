@@ -13,7 +13,7 @@ export default class CreateFishingRope {
     // Tạo hook có physics body bằng cách sử dụng physics.add.image
     private initialHook(): void {
         this.mainGeneral.hook = this.scene.physics.add
-            .image(490, 170, "hook")
+            .image(495, 100, "hook")
             .setOrigin(0.5, 1)
             .setSize(25, 30);
     }

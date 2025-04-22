@@ -5,7 +5,13 @@ export default class MainModel {
     public fishGroup!: Phaser.Physics.Arcade.Group;
     public rope!: Phaser.GameObjects.Graphics;
     public shark!: Phaser.Physics.Arcade.Sprite;
-
+    public maxScore = 2;       
+    public currentScore = 0;
+    public barWidth = 450;
+    public barHeight = 15;
+    public barBg!: Phaser.GameObjects.Rectangle;
+    public barFill!: Phaser.GameObjects.Rectangle;
+    public isBarFull: Boolean = false;
 
     constructor(){}
 }

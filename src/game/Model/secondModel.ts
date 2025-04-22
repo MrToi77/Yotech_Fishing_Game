@@ -17,5 +17,6 @@ export default class secondModel {
     public notifyIndexText: Phaser.GameObjects.Text;
     public notifyContainer!: Phaser.GameObjects.Container;
     public notifyFishLeft: Phaser.GameObjects.Text;
+    public notifyCatchRight: Phaser.GameObjects.Text;
     constructor() {}
 }

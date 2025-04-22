@@ -156,8 +156,8 @@ export default class CreateText {
     }
 
     private notifyText() {
-        const notifyText = this.scene.add
-            .text(0, -30, "You caught", {
+        this.secondGeneral.notifyCatchRight = this.scene.add
+            .text(0, 0, "", {
                 fontSize: "30px",
                 fontStyle: "bolder",
                 color: "#000",
@@ -177,7 +177,7 @@ export default class CreateText {
             .setOrigin(0.5, 0.5);
 
         this.secondGeneral.notifyIndexText = this.scene.add
-            .text(0, 5, "Number: ", {
+            .text(0, -30, "Catch number: ", {
                 fontSize: "25px",
                 fontStyle: "bolder",
                 color: "#000",
@@ -187,9 +187,10 @@ export default class CreateText {
             .setOrigin(0.5, 0.5);
 
         this.secondGeneral.notifyContainer.add([
-            notifyText,
+            // notifyText,
             this.secondGeneral.notifyFishLeft,
             this.secondGeneral.notifyIndexText,
+            this.secondGeneral.notifyCatchRight,
         ]);
         this.secondGeneral.notifyContainer.setVisible(false);
     }

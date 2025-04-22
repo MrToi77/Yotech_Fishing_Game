@@ -11,6 +11,9 @@ class generateModel {
     public levelIndex: number = 1;
     public fishLeft : number = 10;
     public isWrongAnswer: boolean = false;
+    public currentID: number = 0; 
+    public currentFishID: number = 0;
+    public availableIDs: number[] = [];
     public scoreCategory: { [key: string]: number } = {
         "orange": 0,
         "blue": 0,

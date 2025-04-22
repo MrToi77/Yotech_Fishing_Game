@@ -193,12 +193,12 @@ export class FishCountScene extends Phaser.Scene {
         this.button_start_container.setInteractive({ useHandCursor: true });
         this.button_start_container.on("pointerdown", () => {
             if(!generateModelInstance.isWrongAnswer){
-                generateModelInstance.fishAmountOfLevel += 5;
-                generateModelInstance.amount_shark += 1;
+                generateModelInstance.fishAmountOfLevel += 1;
             }
             this.scene.start("mainScene");
             CommunicateBetweenScene.instance.setHookInteractSceneA();
             CommunicateBetweenScene.instance.restartStat();
+            CommunicateBetweenScene.instance.updateBarStat();
 
         });
         this.button_start_container.setVisible(false);

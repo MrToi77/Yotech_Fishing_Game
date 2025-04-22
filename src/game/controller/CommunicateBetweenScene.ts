@@ -66,9 +66,22 @@ export default class CommunicateBetweenScene {
                     200,
                     (this.sceneA?.sys.game.config.height as number) - 50
                 );
-                this.mainController.updateHookPosition(targetY);
+                const targetX = Phaser.Math.Clamp(
+                    pointer.x,
+                    200,
+                    (this.sceneA?.sys.game.config.width as number) - 50
+                );
+                this.mainController.updateHookPosition(targetX, targetY);
             }
         );
+    }
+
+    updateBarStat(){
+        this.mainGeneral.currentScore = 0;
+        this.mainGeneral.isBarFull = false;
+    }
+    updateCurrentID(){
+        generateModelInstance.currentID = generateModelInstance.availableIDs.pop()!;
     }
 
     // Scene B
@@ -116,15 +129,16 @@ export default class CommunicateBetweenScene {
     setNotifyContainerSceneBVisible() {
         this.secondGeneral.notifyContainer.setVisible(true);
     }
+
     setNotifyContainerSceneB(numberCaught: number) {
         this.secondGeneral.notifyIndexText.setText(
-            `Number: ${numberCaught.toString()}`
+            `Catch number: ${numberCaught.toString()}`
         );
         this.secondGeneral.notifyFishLeft.setText(`Fish Left: ${generateModelInstance.fishLeft}`);
     }
 
     setNotifyFinalSceneB() {
-        this.secondGeneral.notifyIndexText.setText("The Final Fish 😀");
+        this.secondGeneral.notifyIndexText.setText("Completed 😀");
         this.secondGeneral.notifyFishLeft.setText(`Fish Left: ${generateModelInstance.fishLeft}`);
     }
     setNotifyContainerSceneBInVisible() {
@@ -142,5 +156,18 @@ export default class CommunicateBetweenScene {
             this.restartStat();
         });
         this.secondGeneral.containerBoard.setVisible(true);
+    }
+
+    setCatchRightFish(right: boolean){
+        if(right){
+            this.secondGeneral.notifyCatchRight.setText("Good!");
+        }else{
+            this.secondGeneral.notifyCatchRight.setText("Wrong Fish!!!");
+        }
+        this.secondGeneral.notifyCatchRight.setVisible(true);
+    }
+
+    setCatchRightFishInvisible(){
+        this.secondGeneral.notifyCatchRight.setVisible(false);
     }
 }

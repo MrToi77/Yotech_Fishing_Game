@@ -61,7 +61,17 @@ export default class mainScene extends Phaser.Scene {
             CommunicateBetweenScene.instance.setHookInteractSceneA();
             generateModelInstance.isRestartPressed = false;
         }
-    }
+
+        // Bar background (khung ngoài)
+        this.mainGeneral.barBg = this.add.rectangle(200, 5, this.mainGeneral.barWidth, this.mainGeneral.barHeight)
+        .setOrigin(0, 0)
+        .setStrokeStyle(2, 0x666666);
+
+        // Bar fill (phần sẽ scale theo score)
+        this.mainGeneral.barFill = this.add.rectangle(200, 5, 0, this.mainGeneral.barHeight)
+        .setOrigin(0, 0)
+        .setFillStyle(0xb5e550);
+            }
 
     // private isHookMoving(): boolean {
     //     return this.mainGeneral.hook.x !== this.mainGeneral.lastHookX || this.mainGeneral.hook.y !== this.mainGeneral.lastHookY;
